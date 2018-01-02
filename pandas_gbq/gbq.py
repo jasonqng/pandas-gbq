@@ -751,6 +751,48 @@ def _parse_data(schema, rows):
     return DataFrame(page_array, columns=col_names)
 
 
+class Client(object):
+    r"""Create a re-usable Client object that you can set with various
+    attributes on initiation for querying and writing to BigQuery.
+
+    This serves as a convenience wrapper around read_gbq() and to_gbq() so you
+    don't need to pass a project_id argument every time, for example.
+
+    "project_id" is required; all others are optional. See read_gbq()
+    and to_gbq() for descriptions of parameters you can set.
+    """
+    def __init__(self, project_id, dialect='standard', verbose=True,
+                 chunksize=10000, if_exists='fail',
+                 reauth=False, private_key=None, auth_local_webserver=False):
+        self.project_id = project_id
+        self.dialect = dialect
+        self.verbose = verbose
+        self.chunksize = chunksize
+        self.if_exists = if_exists
+        self.reauth = reauth
+        self.private_key = private_key
+        self.auth_local_webserver = auth_local_webserver
+
+    def read(self, query):
+        """Run read_gbq()
+        """
+        return read_gbq(query, project_id=self.project_id,
+            dialect=self.dialect, verbose=self.verbose,
+            reauth=self.reauth,
+            private_key=self.private_key,
+            auth_local_webserver=self.auth_local_webserver)
+
+    def write(self, dataframe, destination_table):
+        """Run to_gbq()
+        """
+        to_gbq(dataframe, destination_table, project_id=self.project_id,
+            verbose=self.verbose, chunksize=self.chunksize,
+            if_exists=self.if_exists,
+            reauth=self.reauth,
+            private_key=self.private_key,
+            auth_local_webserver=self.auth_local_webserver)
+
+
 def read_gbq(query, project_id=None, index_col=None, col_order=None,
              reauth=False, verbose=True, private_key=None,
              auth_local_webserver=False, dialect='legacy', **kwargs):
